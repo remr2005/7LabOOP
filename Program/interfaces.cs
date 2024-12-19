@@ -88,13 +88,4 @@ namespace Program
         /// </summary>
         void ProcessOrder();
     }
-    /// <summary>
-    /// Интерфейс для подписки
-    /// </summary>
-    interface IObservable
-    {
-        void AddObserver(IUser o);
-        void RemoveObserver(IUser o);
-        void NotifyObservers();
-    }
 }

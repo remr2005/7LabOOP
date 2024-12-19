@@ -1,76 +1,85 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Program
 {
-    class Program
+    class MainProgram
     {
         static void Main(string[] args)
         {
-            // Создаем продавца
-            var seller = new Seller("Иван Иванов", "ivan@example.com");
+            // Создание фабрик
+            var buyerFactory = new BuyerFactory();
+            var sellerFactory = new SellerFactory();
+            var bookFactory = new BookFactory();
+            var carFactory = new CarFactory();
+            var orderFactory = new ConcreteOrderFactory();
 
-            // Создаем товары
-            var book = new Book
-            {
-                ID = 1,
-                Title = "Мастер и Маргарита",
-                Description = "Роман Михаила Булгакова.",
-                Price = 500,
-                Sale = 10,
-                count = 3,
-                Seller = seller
-            };
+            // Создание пользователей
+            IUser buyer1 = buyerFactory.CreateUser("Иван Иванов", "ivanov@example.com");
+            IUser buyer2 = buyerFactory.CreateUser("Мария Петрова", "petrova@example.com");
+            IUser seller = sellerFactory.CreateUser("Анна Смирнова", "anna@example.com");
 
-            var car = new Car
-            {
-                ID = 2,
-                Title = "Lada Granta",
-                Description = "Новая модель 2024 года.",
-                Price = 700000,
-                Sale = 5,
-                count = 1,
-                Seller = seller
-            };
+            // Увеличение баланса покупателей
+            buyer1.UpdateBalance(50000);
+            buyer2.UpdateBalance(10000);
+            Console.WriteLine($"Баланс {buyer1.Name}: {buyer1.Balance} руб.");
+            Console.WriteLine($"Баланс {buyer2.Name}: {buyer2.Balance} руб.");
 
-            // Продавец добавляет товары на продажу
-            seller.AddProduct(book);
-            seller.AddProduct(car);
+            // Создание товаров
+            Product book = bookFactory.CreateProduct(
+                title: "Программирование на C#",
+                price: 1000,
+                sale: 0, // изначально без скидки
+                seller: seller,
+                desc: "Отличная книга для изучения C#.",
+                count: 0 // товар изначально отсутствует
+            );
 
-            // Создаем покупателей
-            var buyer1 = new Buyer("Алексей", "alex@example.com");
-            var buyer2 = new Buyer("Мария", "maria@example.com");
+            Product car = carFactory.CreateProduct(
+                title: "Toyota Corolla",
+                price: 30000,
+                sale: 5,
+                seller: seller,
+                desc: "Надежный автомобиль для города.",
+                count: 5
+            );
 
-            // Покупатели подписываются на уведомления
+            // Добавление наблюдателей
             book.AddObserverCount(buyer1);
             book.AddObserverSale(buyer2);
 
-            car.AddObserverCount(buyer2);
-            car.AddObserverSale(buyer1);
+            // Добавление товаров продавцом
+            if (seller is Seller concreteSeller)
+            {
+                concreteSeller.AddProduct(book);
+                concreteSeller.AddProduct(car);
+            }
 
-            // Покупатель оформляет заказ
-            var order1 = new Order(buyer1);
-            buyer1.Orders.Add(order1);
-
-            order1.AddToOrder(book);
-            order1.AddToOrder(car);
-
-            // Покупатель пополняет баланс
-            buyer1.UpdateBalance(1000000);
-
-            // Обрабатываем заказ
-            order1.ProcessOrder();
-
-            // Уменьшаем количество товара вручную и уведомляем наблюдателей
-            book.count -= 1;
+            // Пополнение количества книги (уведомляет подписчиков)
+            Console.WriteLine("\nДобавляем книгу на склад...");
+            book.count = 10;
             book.NotifyObserversCount();
 
-            car.Sale = 15; // Изменение скидки
-            car.NotifyObserversSale();
+            // Установка скидки на книгу (уведомляет подписчиков)
+            Console.WriteLine("\nДобавляем скидку на книгу...");
+            book.Sale = 20;
+            book.NotifyObserversSale();
 
-            // Вывод информации о товарах
-            Console.WriteLine(book.AllInfo());
-            Console.WriteLine(car.AllInfo());
+            // Создание заказа покупателем
+            IOrder order = orderFactory.CreateOrder(buyer1);
+
+            // Добавление товаров в заказ
+            if (order is Order concreteOrder)
+            {
+                concreteOrder.AddToOrder(book);
+                concreteOrder.AddToOrder(car);
+
+                // Попытка выполнить заказ
+                Console.WriteLine("\nОбработка заказа...");
+                concreteOrder.ProcessOrder();
+            }
+
+            Console.WriteLine($"\nБаланс покупателя {buyer1.Name} после покупки: {buyer1.Balance} руб.");
+            Console.WriteLine($"Баланс продавца {seller.Name} после продажи: {seller.Balance} руб.");
         }
     }
 }
