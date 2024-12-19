@@ -8,54 +8,69 @@ namespace Program
         static void Main(string[] args)
         {
             // Создаем продавца
-            Seller seller = new Seller("Иван", "ivan@example.com");
+            var seller = new Seller("Иван Иванов", "ivan@example.com");
 
             // Создаем товары
-            Book book = new Book
+            var book = new Book
             {
-                Title = "Война и Мир",
-                Price = 500m,
-                Description = "Классика русской литературы",
-                Seller = seller,
-                count = 10
+                ID = 1,
+                Title = "Мастер и Маргарита",
+                Description = "Роман Михаила Булгакова.",
+                Price = 500,
+                Sale = 10,
+                count = 3,
+                Seller = seller
             };
 
-            Car car = new Car
+            var car = new Car
             {
-                Title = "Toyota Camry",
-                Price = 2000000m,
-                Description = "Надежный и комфортный автомобиль",
-                Seller = seller,
-                count = 1
+                ID = 2,
+                Title = "Lada Granta",
+                Description = "Новая модель 2024 года.",
+                Price = 700000,
+                Sale = 5,
+                count = 1,
+                Seller = seller
             };
 
-            // Продавец добавляет товары
+            // Продавец добавляет товары на продажу
             seller.AddProduct(book);
             seller.AddProduct(car);
 
-            // Покупатель
-            Buyer buyer = new Buyer("Петр", "petr@example.com");
-            buyer.UpdateBalance(3000000m); // Пополняем баланс покупателя
+            // Создаем покупателей
+            var buyer1 = new Buyer("Алексей", "alex@example.com");
+            var buyer2 = new Buyer("Мария", "maria@example.com");
 
-            // Создаем заказ
-            Order order = new Order(buyer);
-            buyer.Orders.Add(order); // Добавляем заказ покупателю
+            // Покупатели подписываются на уведомления
+            book.AddObserverCount(buyer1);
+            book.AddObserverSale(buyer2);
 
-            // Покупатель добавляет товары в заказ
-            order.AddToOrder(book);
-            order.AddToOrder(car);
+            car.AddObserverCount(buyer2);
+            car.AddObserverSale(buyer1);
 
-            // Вывод информации о товаре
+            // Покупатель оформляет заказ
+            var order1 = new Order(buyer1);
+            buyer1.Orders.Add(order1);
+
+            order1.AddToOrder(book);
+            order1.AddToOrder(car);
+
+            // Покупатель пополняет баланс
+            buyer1.UpdateBalance(1000000);
+
+            // Обрабатываем заказ
+            order1.ProcessOrder();
+
+            // Уменьшаем количество товара вручную и уведомляем наблюдателей
+            book.count -= 1;
+            book.NotifyObserversCount();
+
+            car.Sale = 15; // Изменение скидки
+            car.NotifyObserversSale();
+
+            // Вывод информации о товарах
             Console.WriteLine(book.AllInfo());
             Console.WriteLine(car.AllInfo());
-
-            // Обработка заказа
-            order.ProcessOrder();
-
-            // Проверка остатка у покупателя
-            Console.WriteLine($"Баланс покупателя {buyer.Name}: {buyer.Balance} руб.");
-            // Проверка остатка у продавца
-            Console.WriteLine($"Баланс продавца {seller.Name}: {seller.Balance} руб.");
         }
     }
 }

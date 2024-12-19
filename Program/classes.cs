@@ -1,5 +1,4 @@
 ﻿// Observer для уведомления пользователей о появлении товара
-// Observer для уведомления пользователей о появлении нового товара от продавца
 // Observer для уведомления пользователей о появлении скидок на товар
 // Шаблонный метод для показа характеристик товара
 using System;
@@ -9,12 +8,12 @@ namespace Program
     /// <summary>
     /// Товар
     /// </summary>
-    public abstract class Product : IProduct, IObservable
+    public abstract class Product : IProduct
     {
         /// <summary>
         /// ID
         /// </summary>
-        public int ID { get; }
+        public int ID { get; set; }
         /// <summary>
         /// Количество товара
         /// </summary>
@@ -60,30 +59,58 @@ namespace Program
         /// <summary>
         /// Подписка на товар
         /// </summary>
-        private List<IUser> users;
+        private List<IUser> users = new List<IUser>();
         /// <summary>
         /// Добавить наблюдателя за товаром
         /// </summary>
         /// <param name="o"></param>
-        public void AddObserver(IUser o)
+        public void AddObserverCount(IUser o)
         {
             users.Add(o);
         }
         /// <summary>
         /// Уведомить наблюдателй
         /// </summary>
-        public void NotifyObservers()
+        public void NotifyObserversCount()
         {
             foreach (Buyer observer in users)
-                observer.InfSubs(this);
+                observer.InfSubsCount(this);
         }
         /// <summary>
         /// Удалить наблюдателей
         /// </summary>
         /// <param name="o"></param>
-        public void RemoveObserver(IUser o)
+        public void RemoveObserverCount(IUser o)
         {
             users.Remove(o);
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        private List<IUser> usersSale = new List<IUser>();
+        /// <summary>
+        /// Добавить наблюдателя за товаром
+        /// </summary>
+        /// <param name="o"></param>
+        public void AddObserverSale(IUser o)
+        {
+            usersSale.Add(o);
+        }
+        /// <summary>
+        /// Уведомить наблюдателй
+        /// </summary>
+        public void NotifyObserversSale()
+        {
+            foreach (Buyer observer in usersSale)
+                observer.InfSubsSale(this);
+        }
+        /// <summary>
+        /// Удалить наблюдателей
+        /// </summary>
+        /// <param name="o"></param>
+        public void RemoveObserverSale(IUser o)
+        {
+            usersSale.Remove(o);
         }
     }
     /// <summary>
@@ -156,13 +183,25 @@ namespace Program
         {
             this.Balance += Sum;
         }
-        public void InfSubs(Product product)
+        /// <summary>
+        /// Запускается по вызову, сообщает о наличии товара
+        /// </summary>
+        /// <param name="product"></param>
+        public void InfSubsCount(Product product)
         {
             if (product.count > 0)
                 Console.WriteLine($"{product.Title} вновь в продаже");
-            if (product.Sale > 0)
-                Console.WriteLine($"{product.Title} имеет скидку в {product.Sale}%");
         }
+        /// <summary>
+        /// Запускается по вызову, сообщает о наличии скидки
+        /// </summary>
+        /// <param name="product"></param>
+        public void InfSubsSale(Product product)
+        {
+            if (product.Sale > 0)
+                Console.WriteLine($"на товар {product.Title} действует ссылка в {product.Sale}");
+        }
+
     }
     /// <summary>
     /// Продавец
